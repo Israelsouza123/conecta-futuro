@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conecta Futuros — Programa Transforma Futuros</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.0.3/index.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
+                        accent: { 50: '#fdf4ff', 100: '#fae8ff', 200: '#f5d0fe', 300: '#f0abfc', 400: '#e879f9', 500: '#d946ef', 600: '#c026d3', 700: '#a21caf', 800: '#86198f', 900: '#701a75' },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; }
+        .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .gradient-hero { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #7c3aed 100%); }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        .animate-slide-up { animation: slideUp 0.4s ease-out; }
+        .animate-slide-down { animation: slideDown 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-overlay { backdrop-filter: blur(4px); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .card-hover { transition: all 0.3s ease; }
+        .btn-primary { background: linear-gradient(135deg, #2563eb, #7c3aed); transition: all 0.3s ease; }
+        .btn-primary:hover { background: linear-gradient(135deg, #1d4ed8, #6d28d9); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.4); }
+        .btn-success { background: linear-gradient(135deg, #16a34a, #059669); transition: all 0.3s ease; }
+        .btn-success:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(22,163,74,0.4); }
+        .btn-danger { background: linear-gradient(135deg, #dc2626, #b91c1c); transition: all 0.3s ease; }
+        .btn-danger:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,0.4); }
+        .input-focus:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .tab-btn { transition: all 0.2s ease; }
+        .tab-btn.active { background: white; color: #1e40af; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        const initialUsers = [
+            { id: 1, nome: "Maria Silva", email: "maria@email.com", telefone: "(11) 99999-1234", cidade: "São Paulo", estado: "SP", perfil: "Profissional", dataCadastro: "2024-01-15" },
+            { id: 2, nome: "João Santos", email: "joao@email.com", telefone: "(21) 98888-5678", cidade: "Rio de Janeiro", estado: "RJ", perfil: "Mentor", dataCadastro: "2024-02-20" },
+            { id: 3, nome: "Ana Oliveira", email: "ana@email.com", telefone: "(31) 97777-9012", cidade: "Belo Horizonte", estado: "MG", perfil: "Profissional", dataCadastro: "2024-03-10" },
+            { id: 4, nome: "Carlos Pereira", email: "carlos@email.com", telefone: "(41) 96666-3456", cidade: "Curitiba", estado: "PR", perfil: "Mentor", dataCadastro: "2024-03-25" },
+            { id: 5, nome: "Fernanda Lima", email: "fernanda@email.com", telefone: "(51) 95555-7890", cidade: "Porto Alegre", estado: "RS", perfil: "Profissional", dataCadastro: "2024-04-05" },
+        ];
+
+        const initialVagas = [
+            { id: 1, titulo: "Desenvolvedor(a) Frontend", empresa: "TechCorp", modalidade: "Remoto", salario: "R$ 5.000 - R$ 7.000", area: "Tecnologia", descricao: "Desenvolvimento de interfaces web com React", status: "Aberta", dataPublicacao: "2024-04-01" },
+            { id: 2, titulo: "Analista de Dados", empresa: "DataSoft", modalidade: "Presencial", salario: "R$ 4.500 - R$ 6.000", area: "Tecnologia", descricao: "Análise e visualização de dados empresariais", status: "Aberta", dataPublicacao: "2024-04-05" },
+            { id: 3, titulo: "Coordenador(a) de Projetos", empresa: "InovaHub", modalidade: "Híbrido", salario: "R$ 7.000 - R$ 9.000", area: "Gestão", descricao: "Gestão de projetos de transformação digital", status: "Aberta", dataPublicacao: "2024-04-10" },
+            { id: 4, titulo: "Designer UX/UI", empresa: "CreativeLab", modalidade: "Remoto", salario: "R$ 4.000 - R$ 6.500", area: "Design", descricao: "Criação de experiências digitais intuitivas", status: "Fechada", dataPublicacao: "2024-03-20" },
+        ];
+
+        const initialCursos = [
+            { id: 1, titulo: "Desenvolvimento Web com React", instrutor: "Prof. Ricardo Mendes", duracao: "60 horas", modalidade: "Online", categoria: "Tecnologia", vagas: 30, inscritos: 22, status: "Ativo" },
+            { id: 2, titulo: "Empreendedorismo Social", instrutor: "Profa. Camila Rocha", duracao: "40 horas", modalidade: "Presencial", categoria: "Negócios", vagas: 25, inscritos: 25, status: "Lotado" },
+            { id: 3, titulo: "Excel Avançado para Negócios", instrutor: "Prof. André Costa", duracao: "30 horas", modalidade: "Online", categoria: "Gestão", vagas: 50, inscritos: 18, status: "Ativo" },
+            { id: 4, titulo: "Liderança e Gestão de Equipes", instrutor: "Profa. Beatriz Alves", duracao: "45 horas", modalidade: "Híbrido", categoria: "Gestão", vagas: 20, inscritos: 12, status: "Ativo" },
+            { id: 5, titulo: "Marketing Digital", instrutor: "Prof. Lucas Ferreira", duracao: "35 horas", modalidade: "Online", categoria: "Marketing", vagas: 40, inscritos: 40, status: "Lotado" },
+        ];
+
+        const initialInscricoes = [
+            { id: 1, cursoId: 1, cursoTitulo: "Desenvolvimento Web com React", alunoNome: "Maria Silva", alunoEmail: "maria@email.com", alunoTelefone: "(11) 99999-1234", formacao: "Ensino Médio Completo", motivacao: "Desejo migrar para a área de tecnologia", dataInscricao: "2024-04-01", status: "Aprovado" },
+            { id: 2, cursoId: 3, cursoTitulo: "Excel Avançado para Negócios", alunoNome: "Ana Oliveira", alunoEmail: "ana@email.com", alunoTelefone: "(31) 97777-9012", formacao: "Graduação em Administração", motivacao: "Aprimorar habilidades analíticas", dataInscricao: "2024-04-08", status: "Pendente" },
+        ];
+
+        const initialCandidaturas = [
+            { id: 1, vagaId: 1, vagaTitulo: "Desenvolvedor(a) Frontend", empresa: "TechCorp", candidatoNome: "Maria Silva", candidatoEmail: "maria@email.com", candidatoTelefone: "(11) 99999-1234", experiencia: "1 ano com HTML, CSS e JavaScript", linkedin: "linkedin.com/in/mariasilva", apresentacao: "Tenho grande interesse na vaga e estou em transição de carreira para tecnologia.", dataCandidatura: "2024-04-05", status: "Em Análise" },
+            { id: 2, vagaId: 3, vagaTitulo: "Coordenador(a) de Projetos", empresa: "InovaHub", candidatoNome: "João Santos", candidatoEmail: "joao@email.com", candidatoTelefone: "(21) 98888-5678", experiencia: "5 anos em gestão de projetos", linkedin: "linkedin.com/in/joaosantos", apresentacao: "Experiência sólida em metodologias ágeis e liderança de equipes.", dataCandidatura: "2024-04-12", status: "Pendente" },
+        ];
+
+        const apiService = {
+            users: { data: [...initialUsers], nextId: 6 },
+            vagas: { data: [...initialVagas], nextId: 5 },
+            cursos: { data: [...initialCursos], nextId: 6 },
+            inscricoes: { data: [...initialInscricoes], nextId: 3 },
+            candidaturas: { data: [...initialCandidaturas], nextId: 3 },
+            getAll(type) { return [...this[type].data]; },
+            create(type, item) { const newItem = { ...item, id: this[type].nextId++ }; this[type].data.push(newItem); return newItem; },
+            update(type, id, updates) { const idx = this[type].data.findIndex(i => i.id === id); if (idx !== -1) { this[type].data[idx] = { ...this[type].data[idx], ...updates }; return this[type].data[idx]; } return null; },
+            delete(type, id) { this[type].data = this[type].data.filter(i => i.id !== id); }
+        };
+
+        const Icons = {
+            Home: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
+            Users: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
+            Briefcase: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>,
+            Book: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>,
+            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>,
+            Edit: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>,
+            Trash: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>,
+            Close: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>,
+            Menu: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>,
+            Search: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>,
+            Target: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
+            Heart: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>,
+            Rocket: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" /></svg>,
+            ChevronRight: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>,
+            Check: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>,
+            Alert: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>,
+            Graduate: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /></svg>,
+            Document: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
+            Eye: () => <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>,
+        };
+
+        function Navbar({ currentPage, setCurrentPage }) {
+            const [mobileOpen, setMobileOpen] = useState(false);
+            const navItems = [
+                { id: 'home', label: 'Início', icon: <Icons.Home /> },
+                { id: 'usuarios', label: 'Usuários', icon: <Icons.Users /> },
+                { id: 'vagas', label: 'Vagas', icon: <Icons.Briefcase /> },
+                { id: 'cursos', label: 'Cursos', icon: <Icons.Book /> },
+            ];
+
+            return (
+                <nav className="bg-white shadow-lg sticky top-0 z-40 border-b border-gray-100">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-16">
+                            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-accent-600 flex items-center justify-center">
+                                    <span className="text-white font-bold text-lg">C</span>
+                                </div>
+                                <div>
+                                    <h1 className="font-display font-bold text-lg text-gray-900 leading-tight">Conecta Futuros</h1>
+                                    <p className="text-[10px] text-gray-500 -mt-0.5">Programa Transforma Futuros</p>
+                                </div>
+                            </div>
+
+                            <div className="hidden md:flex items-center gap-1">
+                                {navItems.map(item => (
+                                    <button key={item.id} onClick={() => setCurrentPage(item.id)}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                            currentPage === item.id ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}>
+                                        {item.icon}
+                                        {item.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button className="md:hidden p-2 rounded-lg hover:bg-gray-100" onClick={() => setMobileOpen(!mobileOpen)}>
+                                {mobileOpen ? <Icons.Close /> : <Icons.Menu />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {mobileOpen && (
+                        <div className="md:hidden bg-white border-t border-gray-100 animate-slide-down">
+                            <div className="px-4 py-3 space-y-1">
+                                {navItems.map(item => (
+                                    <button key={item.id} onClick={() => { setCurrentPage(item.id); setMobileOpen(false); }}
+                                        className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                                            currentPage === item.id ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-50'
+                                        }`}>
+                                        {item.icon}
+                                        {item.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </nav>
+            );
+        }
+
+        function Modal({ isOpen, onClose, title, children, size = 'md' }) {
+            if (!isOpen) return null;
+            const sizes = { sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' };
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay bg-black/50 animate-fade-in" onClick={onClose}>
+                    <div className={`bg-white rounded-2xl shadow-2xl w-full ${sizes[size]} max-h-[90vh] overflow-hidden animate-slide-up`} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                            <h3 className="font-display font-bold text-lg text-gray-900">{title}</h3>
+                            <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 transition-colors"><Icons.Close /></button>
+                        </div>
+                        <div className="px-6 py-5 overflow-y-auto max-h-[calc(90vh-80px)]">{children}</div>
+                    </div>
+                </div>
+            );
+        }
+
+        function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }) {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay bg-black/50 animate-fade-in" onClick={onClose}>
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-slide-up" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 text-center">
+                            <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4 text-red-600">
+                                <Icons.Alert />
+                            </div>
+                            <h3 className="font-display font-bold text-lg text-gray-900 mb-2">{title}</h3>
+                            <p className="text-gray-500 text-sm mb-6">{message}</p>
+                            <div className="flex gap-3">
+                                <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors">Cancelar</button>
+                                <button onClick={onConfirm} className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition-colors">Confirmar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Toast({ message, type, onClose }) {
+            useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, []);
+            const colors = { success: 'bg-green-500', error: 'bg-red-500', info: 'bg-primary-500' };
+            return (
+                <div className={`fixed top-20 right-4 z-[60] ${colors[type]} text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-slide-down`}>
+                    {type === 'success' ? <Icons.Check /> : <Icons.Alert />}
+                    <span className="font-medium text-sm">{message}</span>
+                </div>
+            );
+        }
+
+        function StatCard({ icon, label, value, color }) {
+            const colorMap = {
+                blue: 'bg-primary-50 text-primary-600',
+                purple: 'bg-accent-50 text-accent-600',
+                green: 'bg-green-50 text-green-600',
+                orange: 'bg-orange-50 text-orange-600',
+            };
+            return (
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover">
+                    <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl ${colorMap[color]} flex items-center justify-center`}>{icon}</div>
+                        <div>
+                            <p className="text-2xl font-display font-bold text-gray-900">{value}</p>
+                            <p className="text-sm text-gray-500">{label}</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Badge({ children, variant = 'default' }) {
+            const variants = {
+                default: 'bg-gray-100 text-gray-700',
+                success: 'bg-green-100 text-green-700',
+                warning: 'bg-amber-100 text-amber-700',
+                danger: 'bg-red-100 text-red-700',
+                info: 'bg-primary-100 text-primary-700',
+                purple: 'bg-accent-100 text-accent-700',
+            };
+            return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]}`}>{children}</span>;
+        }
+
+        function SearchBar({ value, onChange, placeholder }) {
+            return (
+                <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><Icons.Search /></div>
+                    <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm input-focus outline-none transition-all" />
+                </div>
+            );
+        }
+
+        function Tabs({ tabs, active, onChange }) {
+            return (
+                <div className="flex bg-gray-100 rounded-xl p-1 gap-1 mb-6 overflow-x-auto">
+                    {tabs.map(tab => (
+                        <button key={tab.id} onClick={() => onChange(tab.id)}
+                            className={`tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap flex-1 justify-center ${
+                                active === tab.id ? 'active' : 'text-gray-600 hover:text-gray-900'
+                            }`}>
+                            {tab.icon}
+                            {tab.label}
+                            {tab.count !== undefined && (
+                                <span className={`text-xs px-1.5 py-0.5 rounded-full ${active === tab.id ? 'bg-primary-100 text-primary-700' : 'bg-gray-200 text-gray-600'}`}>
+                                    {tab.count}
+                                </span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            );
+        }
+
+        function HomePage({ setCurrentPage }) {
+            const totalInscricoes = apiService.getAll('inscricoes').length;
+            const totalCandidaturas = apiService.getAll('candidaturas').length;
+
+            return (
+                <div className="animate-fade-in">
+                    <section className="gradient-hero text-white">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+                            <div className="grid lg:grid-cols-2 gap-12 items-center">
+                                <div className="animate-slide-up">
+                                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 mb-6">
+                                        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                        <span className="text-sm font-medium">Plataforma de Oportunidades Profissionais</span>
+                                    </div>
+                                    <h1 className="font-display text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-6">
+                                        Conectando pessoas a <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-300">oportunidades</span> de futuro
+                                    </h1>
+                                    <p className="text-lg text-blue-100 mb-8 max-w-xl leading-relaxed">
+                                        Uma plataforma que conecta adultos a vagas de emprego e cursos de capacitação profissional, com inscrição e candidatura simplificadas.
+                                    </p>
+                                    <div className="flex flex-wrap gap-4">
+                                        <button onClick={() => setCurrentPage('vagas')} className="btn-primary px-8 py-3.5 rounded-xl text-white font-semibold flex items-center gap-2">
+                                            Explorar Vagas <Icons.ChevronRight />
+                                        </button>
+                                        <button onClick={() => setCurrentPage('cursos')} className="px-8 py-3.5 rounded-xl border-2 border-white/30 text-white font-semibold hover:bg-white/10 transition-all">
+                                            Ver Cursos
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="hidden lg:block">
+                                    <div className="relative">
+                                        <div className="absolute -top-4 -left-4 w-72 h-72 bg-white/5 rounded-full blur-3xl"></div>
+                                        <div className="relative bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="bg-white/10 rounded-2xl p-5 text-center">
+                                                    <p className="text-3xl font-bold">500+</p>
+                                                    <p className="text-sm text-blue-200 mt-1">Pessoas Conectadas</p>
+                                                </div>
+                                                <div className="bg-white/10 rounded-2xl p-5 text-center">
+                                                    <p className="text-3xl font-bold">120+</p>
+                                                    <p className="text-sm text-blue-200 mt-1">Vagas Disponíveis</p>
+                                                </div>
+                                                <div className="bg-white/10 rounded-2xl p-5 text-center">
+                                                    <p className="text-3xl font-bold">45+</p>
+                                                    <p className="text-sm text-blue-200 mt-1">Cursos Ativos</p>
+                                                </div>
+                                                <div className="bg-white/10 rounded-2xl p-5 text-center">
+                                                    <p className="text-3xl font-bold">85%</p>
+                                                    <p className="text-sm text-blue-200 mt-1">Taxa de Satisfação</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <StatCard icon={<Icons.Users />} label="Usuários" value="5" color="blue" />
+                            <StatCard icon={<Icons.Briefcase />} label="Vagas" value="4" color="purple" />
+                            <StatCard icon={<Icons.Book />} label="Cursos" value="5" color="green" />
+                            <StatCard icon={<Icons.Graduate />} label="Inscrições" value={totalInscricoes} color="orange" />
+                        </div>
+                    </section>
+
+                    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                        <div className="text-center mb-14">
+                            <h2 className="font-display text-3xl font-bold text-gray-900 mb-4">Sobre o Projeto</h2>
+                            <p className="text-gray-500 max-w-2xl mx-auto">Conheça os pilares que fundamentam o Conecta Futuros e como estamos transformando vidas através da tecnologia.</p>
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {[
+                                { icon: <Icons.Target />, title: "Problema", desc: "Adultos enfrentam dificuldades para acessar oportunidades de emprego e capacitação profissional de forma organizada.", color: "bg-primary-50 text-primary-600" },
+                                { icon: <Icons.Heart />, title: "Público-Alvo", desc: "Adultos (18+) em busca de recolocação profissional ou capacitação para ingressar no mercado de trabalho.", color: "bg-red-50 text-red-600" },
+                                { icon: <Icons.Rocket />, title: "Impacto Esperado", desc: "Promover inclusão produtiva, reduzir desigualdades e fomentar o crescimento econômico sustentável na comunidade.", color: "bg-accent-50 text-accent-600" },
+                            ].map((item, i) => (
+                                <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover">
+                                    <div className={`w-14 h-14 rounded-xl ${item.color} flex items-center justify-center mb-4`}>{item.icon}</div>
+                                    <h3 className="font-display font-bold text-lg text-gray-900 mb-2">{item.title}</h3>
+                                    <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                        <div className="text-center mb-14">
+                            <h2 className="font-display text-3xl font-bold text-gray-900 mb-4">Funcionalidades do Sistema</h2>
+                            <p className="text-gray-500 max-w-2xl mx-auto">CRUDs completos integrados ao frontend com processos de inscrição e candidatura</p>
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {[
+                                { title: "Usuários", desc: "Gerenciamento de profissionais e mentores cadastrados na plataforma", icon: <Icons.Users />, count: "5 registros" },
+                                { title: "Vagas + Candidaturas", desc: "Publicação de vagas e processo de candidatura simplificado", icon: <Icons.Briefcase />, count: `${apiService.getAll('vagas').length} vagas · ${totalCandidaturas} candidaturas` },
+                                { title: "Cursos + Inscrições", desc: "Oferta de cursos com sistema de inscrição de alunos", icon: <Icons.Book />, count: `${apiService.getAll('cursos').length} cursos · ${totalInscricoes} inscrições` },
+                            ].map((crud, i) => (
+                                <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover">
+                                    <div className="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center mb-4">{crud.icon}</div>
+                                    <h3 className="font-display font-bold text-lg text-gray-900 mb-2">{crud.title}</h3>
+                                    <p className="text-sm text-gray-500 mb-4">{crud.desc}</p>
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {['Criar', 'Listar', 'Atualizar', 'Remover'].map(op => (
+                                            <span key={op} className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-1 rounded-lg">
+                                                <Icons.Check /> {op}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-gray-400">{crud.count}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </div>
+            );
+        }
+
+        // ==================== USUÁRIOS (com botão Excluir destacado) ====================
+        function UsuariosPage() {
+            const [users, setUsers] = useState(apiService.getAll('users'));
+            const [search, setSearch] = useState('');
+            const [modalOpen, setModalOpen] = useState(false);
+            const [editingUser, setEditingUser] = useState(null);
+            const [confirmDelete, setConfirmDelete] = useState(null);
+            const [toast, setToast] = useState(null);
+            const [form, setForm] = useState({ nome: '', email: '', telefone: '', cidade: '', estado: '', perfil: 'Profissional' });
+
+            const filtered = useMemo(() => users.filter(u => u.nome.toLowerCase().includes(search.toLowerCase()) || u.cidade.toLowerCase().includes(search.toLowerCase())), [users, search]);
+
+            const openCreate = () => { setEditingUser(null); setForm({ nome: '', email: '', telefone: '', cidade: '', estado: '', perfil: 'Profissional' }); setModalOpen(true); };
+            const openEdit = (user) => { setEditingUser(user); setForm({ nome: user.nome, email: user.email, telefone: user.telefone, cidade: user.cidade, estado: user.estado, perfil: user.perfil }); setModalOpen(true); };
+
+            const handleSave = () => {
+                if (!form.nome || !form.email) { setToast({ message: 'Preencha os campos obrigatórios', type: 'error' }); return; }
+                if (editingUser) {
+                    apiService.update('users', editingUser.id, form);
+                    setToast({ message: 'Usuário atualizado!', type: 'success' });
+                } else {
+                    apiService.create('users', { ...form, dataCadastro: new Date().toISOString().split('T')[0] });
+                    setToast({ message: 'Usuário criado!', type: 'success' });
+                }
+                setUsers(apiService.getAll('users'));
+                setModalOpen(false);
+            };
+
+            const handleDelete = () => {
+                apiService.delete('users', confirmDelete.id);
+                setUsers(apiService.getAll('users'));
+                setConfirmDelete(null);
+                setToast({ message: 'Usuário removido com sucesso!', type: 'success' });
+            };
+
+            return (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+                    {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                        <div>
+                            <h1 className="font-display text-2xl font-bold text-gray-900">Gerenciar Usuários</h1>
+                            <p className="text-gray-500 text-sm mt-1">CRUD completo de usuários da plataforma</p>
+                        </div>
+                        <button onClick={openCreate} className="btn-primary px-5 py-2.5 rounded-xl text-white font-medium flex items-center gap-2 text-sm w-fit">
+                            <Icons.Plus /> Novo Usuário
+                        </button>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="p-4 border-b border-gray-100">
+                            <SearchBar value={search} onChange={setSearch} placeholder="Buscar por nome ou cidade..." />
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gray-50">
+                                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nome</th>
+                                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Telefone</th>
+                                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Cidade/UF</th>
+                                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Perfil</th>
+                                        <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {filtered.map(user => (
+                                        <tr key={user.id} className="hover:bg-gray-50/50 transition-colors group">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">{user.nome.charAt(0)}</div>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900 text-sm">{user.nome}</p>
+                                                        <p className="text-xs text-gray-400">{user.dataCadastro}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-600 hidden md:table-cell">{user.telefone}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-600 hidden lg:table-cell">{user.cidade}/{user.estado}</td>
+                                            <td className="px-6 py-4"><Badge variant={user.perfil === 'Mentor' ? 'purple' : 'info'}>{user.perfil}</Badge></td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button onClick={() => openEdit(user)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors text-xs font-medium"
+                                                        title="Editar">
+                                                        <Icons.Edit />
+                                                        <span className="hidden sm:inline">Editar</span>
+                                                    </button>
+                                                    <button onClick={() => setConfirmDelete(user)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors text-xs font-medium"
+                                                        title="Excluir">
+                                                        <Icons.Trash />
+                                                        <span className="hidden sm:inline">Excluir</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        {filtered.length === 0 && <div className="text-center py-12 text-gray-400">Nenhum usuário encontrado</div>}
+                        <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
+                            <p className="text-xs text-gray-400">{filtered.length} registro(s)</p>
+                        </div>
+                    </div>
+
+                    <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingUser ? 'Editar Usuário' : 'Novo Usuário'}>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
+                                <input type="text" value={form.nome} onChange={e => setForm({...form, nome: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Digite o nome completo" />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                    <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="email@exemplo.com" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                                    <input type="text" value={form.telefone} onChange={e => setForm({...form, telefone: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="(00) 00000-0000" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                                    <input type="text" value={form.cidade} onChange={e => setForm({...form, cidade: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Cidade" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                                    <input type="text" value={form.estado} onChange={e => setForm({...form, estado: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="UF" maxLength={2} />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Perfil</label>
+                                <select value={form.perfil} onChange={e => setForm({...form, perfil: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none bg-white">
+                                    <option value="Profissional">Profissional</option>
+                                    <option value="Mentor">Mentor</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <button onClick={() => setModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm">Cancelar</button>
+                                <button onClick={handleSave} className="flex-1 btn-primary px-4 py-2.5 rounded-xl text-white font-medium text-sm">{editingUser ? 'Atualizar' : 'Criar'}</button>
+                            </div>
+                        </div>
+                    </Modal>
+
+                    <ConfirmDialog
+                        isOpen={!!confirmDelete}
+                        onClose={() => setConfirmDelete(null)}
+                        onConfirm={handleDelete}
+                        title="Excluir Usuário"
+                        message={`Deseja realmente excluir o usuário "${confirmDelete?.nome}"? Esta ação não pode ser desfeita.`}
+                    />
+                </div>
+            );
+        }
+
+        // ==================== VAGAS + CANDIDATURAS ====================
+        function VagasPage() {
+            const [vagas, setVagas] = useState(apiService.getAll('vagas'));
+            const [candidaturas, setCandidaturas] = useState(apiService.getAll('candidaturas'));
+            const [activeTab, setActiveTab] = useState('vagas');
+            const [search, setSearch] = useState('');
+            const [modalOpen, setModalOpen] = useState(false);
+            const [editingVaga, setEditingVaga] = useState(null);
+            const [candidaturaModal, setCandidaturaModal] = useState({ open: false, vaga: null });
+            const [detalheCandidatura, setDetalheCandidatura] = useState(null);
+            const [confirmDelete, setConfirmDelete] = useState(null);
+            const [confirmCancelCand, setConfirmCancelCand] = useState(null);
+            const [toast, setToast] = useState(null);
+            const [viewMode, setViewMode] = useState('table');
+
+            const [form, setForm] = useState({ titulo: '', empresa: '', modalidade: 'Remoto', salario: '', area: '', descricao: '', status: 'Aberta' });
+            const [candForm, setCandForm] = useState({ candidatoNome: '', candidatoEmail: '', candidatoTelefone: '', experiencia: '', linkedin: '', apresentacao: '' });
+
+            const filteredVagas = useMemo(() => vagas.filter(v => v.titulo.toLowerCase().includes(search.toLowerCase()) || v.empresa.toLowerCase().includes(search.toLowerCase())), [vagas, search]);
+            const filteredCand = useMemo(() => candidaturas.filter(c => c.vagaTitulo.toLowerCase().includes(search.toLowerCase()) || c.candidatoNome.toLowerCase().includes(search.toLowerCase())), [candidaturas, search]);
+
+            const openCreate = () => { setEditingVaga(null); setForm({ titulo: '', empresa: '', modalidade: 'Remoto', salario: '', area: '', descricao: '', status: 'Aberta' }); setModalOpen(true); };
+            const openEdit = (vaga) => { setEditingVaga(vaga); setForm({ titulo: vaga.titulo, empresa: vaga.empresa, modalidade: vaga.modalidade, salario: vaga.salario, area: vaga.area, descricao: vaga.descricao, status: vaga.status }); setModalOpen(true); };
+
+            const handleSaveVaga = () => {
+                if (!form.titulo || !form.empresa) { setToast({ message: 'Preencha os campos obrigatórios', type: 'error' }); return; }
+                if (editingVaga) {
+                    apiService.update('vagas', editingVaga.id, form);
+                    setToast({ message: 'Vaga atualizada!', type: 'success' });
+                } else {
+                    apiService.create('vagas', { ...form, dataPublicacao: new Date().toISOString().split('T')[0] });
+                    setToast({ message: 'Vaga criada!', type: 'success' });
+                }
+                setVagas(apiService.getAll('vagas'));
+                setModalOpen(false);
+            };
+
+            const handleDeleteVaga = () => {
+                apiService.delete('vagas', confirmDelete.id);
+                setVagas(apiService.getAll('vagas'));
+                setConfirmDelete(null);
+                setToast({ message: 'Vaga removida!', type: 'success' });
+            };
+
+            const openCandidatura = (vaga) => {
+                setCandForm({ candidatoNome: '', candidatoEmail: '', candidatoTelefone: '', experiencia: '', linkedin: '', apresentacao: '' });
+                setCandidaturaModal({ open: true, vaga });
+            };
+
+            const handleSalvarCandidatura = () => {
+                const { candidatoNome, candidatoEmail, candidatoTelefone } = candForm;
+                if (!candidatoNome || !candidatoEmail || !candidatoTelefone) {
+                    setToast({ message: 'Preencha nome, email e telefone', type: 'error' }); return;
+                }
+                const vaga = candidaturaModal.vaga;
+                const duplicata = candidaturas.some(c => c.vagaId === vaga.id && c.candidatoEmail.toLowerCase() === candidatoEmail.toLowerCase());
+                if (duplicata) {
+                    setToast({ message: 'Você já se candidatou a esta vaga com este email', type: 'error' }); return;
+                }
+                apiService.create('candidaturas', {
+                    ...candForm,
+                    vagaId: vaga.id,
+                    vagaTitulo: vaga.titulo,
+                    empresa: vaga.empresa,
+                    dataCandidatura: new Date().toISOString().split('T')[0],
+                    status: 'Pendente'
+                });
+                setCandidaturas(apiService.getAll('candidaturas'));
+                setCandidaturaModal({ open: false, vaga: null });
+                setToast({ message: 'Candidatura enviada com sucesso!', type: 'success' });
+            };
+
+            const handleCancelarCandidatura = () => {
+                apiService.delete('candidaturas', confirmCancelCand.id);
+                setCandidaturas(apiService.getAll('candidaturas'));
+                setConfirmCancelCand(null);
+                setToast({ message: 'Candidatura cancelada!', type: 'success' });
+            };
+
+            const statusCandColor = { 'Pendente': 'warning', 'Em Análise': 'info', 'Aprovado': 'success', 'Rejeitado': 'danger' };
+            const modalidadeColor = { Remoto: 'success', Presencial: 'warning', Híbrido: 'info' };
+
+            const tabs = [
+                { id: 'vagas', label: 'Vagas Disponíveis', icon: <Icons.Briefcase />, count: vagas.length },
+                { id: 'candidaturas', label: 'Minhas Candidaturas', icon: <Icons.Document />, count: candidaturas.length },
+            ];
+
+            return (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+                    {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                        <div>
+                            <h1 className="font-display text-2xl font-bold text-gray-900">Vagas de Emprego</h1>
+                            <p className="text-gray-500 text-sm mt-1">Explore vagas e candidate-se às oportunidades</p>
+                        </div>
+                        {activeTab === 'vagas' && (
+                            <div className="flex items-center gap-3">
+                                <div className="flex bg-gray-100 rounded-lg p-0.5">
+                                    <button onClick={() => setViewMode('table')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'table' ? 'bg-white shadow text-gray-900' : 'text-gray-500'}`}>Tabela</button>
+                                    <button onClick={() => setViewMode('cards')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'cards' ? 'bg-white shadow text-gray-900' : 'text-gray-500'}`}>Cards</button>
+                                </div>
+                                <button onClick={openCreate} className="btn-primary px-5 py-2.5 rounded-xl text-white font-medium flex items-center gap-2 text-sm">
+                                    <Icons.Plus /> Nova Vaga
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <Tabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
+
+                    <div className="mb-6">
+                        <SearchBar value={search} onChange={setSearch} placeholder={activeTab === 'vagas' ? 'Buscar por título ou empresa...' : 'Buscar por vaga ou candidato...'} />
+                    </div>
+
+                    {activeTab === 'vagas' && (
+                        <>
+                            {viewMode === 'table' ? (
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="bg-gray-50">
+                                                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Vaga</th>
+                                                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Empresa</th>
+                                                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Modalidade</th>
+                                                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Salário</th>
+                                                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-50">
+                                                {filteredVagas.map(vaga => (
+                                                    <tr key={vaga.id} className="hover:bg-gray-50/50 transition-colors">
+                                                        <td className="px-6 py-4">
+                                                            <p className="font-medium text-gray-900 text-sm">{vaga.titulo}</p>
+                                                            <p className="text-xs text-gray-400">{vaga.area}</p>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-gray-600 hidden md:table-cell">{vaga.empresa}</td>
+                                                        <td className="px-6 py-4 hidden lg:table-cell"><Badge variant={modalidadeColor[vaga.modalidade]}>{vaga.modalidade}</Badge></td>
+                                                        <td className="px-6 py-4 text-sm text-gray-600 hidden lg:table-cell">{vaga.salario}</td>
+                                                        <td className="px-6 py-4"><Badge variant={vaga.status === 'Aberta' ? 'success' : 'danger'}>{vaga.status}</Badge></td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <button onClick={() => openCandidatura(vaga)} disabled={vaga.status !== 'Aberta'} title="Candidatar-se"
+                                                                    className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                                                                    <Icons.Document />
+                                                                </button>
+                                                                <button onClick={() => openEdit(vaga)} className="p-2 rounded-lg hover:bg-primary-50 text-gray-400 hover:text-primary-600 transition-colors"><Icons.Edit /></button>
+                                                                <button onClick={() => setConfirmDelete(vaga)} className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"><Icons.Trash /></button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {filteredVagas.length === 0 && <div className="text-center py-12 text-gray-400">Nenhuma vaga encontrada</div>}
+                                </div>
+                            ) : (
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                    {filteredVagas.map(vaga => (
+                                        <div key={vaga.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover">
+                                            <div className="flex items-start justify-between mb-3">
+                                                <Badge variant={vaga.status === 'Aberta' ? 'success' : 'danger'}>{vaga.status}</Badge>
+                                                <div className="flex gap-1">
+                                                    <button onClick={() => openEdit(vaga)} className="p-1.5 rounded-lg hover:bg-primary-50 text-gray-400 hover:text-primary-600 transition-colors"><Icons.Edit /></button>
+                                                    <button onClick={() => setConfirmDelete(vaga)} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"><Icons.Trash /></button>
+                                                </div>
+                                            </div>
+                                            <h3 className="font-display font-bold text-gray-900 mb-1">{vaga.titulo}</h3>
+                                            <p className="text-sm text-primary-600 font-medium mb-3">{vaga.empresa}</p>
+                                            <p className="text-sm text-gray-500 mb-4 line-clamp-2">{vaga.descricao}</p>
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                <Badge variant={modalidadeColor[vaga.modalidade]}>{vaga.modalidade}</Badge>
+                                                <Badge>{vaga.area}</Badge>
+                                            </div>
+                                            <p className="text-sm font-semibold text-gray-700 mb-4">{vaga.salario}</p>
+                                            <button onClick={() => openCandidatura(vaga)} disabled={vaga.status !== 'Aberta'}
+                                                className="w-full btn-success px-4 py-2 rounded-xl text-white font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                                                <Icons.Document /> Candidatar-se
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {activeTab === 'candidaturas' && (
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gray-50">
+                                            <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Candidato</th>
+                                            <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Vaga</th>
+                                            <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Empresa</th>
+                                            <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Data</th>
+                                            <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-50">
+                                        {filteredCand.map(c => (
+                                            <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <p className="font-medium text-gray-900 text-sm">{c.candidatoNome}</p>
+                                                    <p className="text-xs text-gray-400">{c.candidatoEmail}</p>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-700 font-medium">{c.vagaTitulo}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600 hidden md:table-cell">{c.empresa}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600 hidden lg:table-cell">{c.dataCandidatura}</td>
+                                                <td className="px-6 py-4"><Badge variant={statusCandColor[c.status]}>{c.status}</Badge></td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <button onClick={() => setDetalheCandidatura(c)} className="p-2 rounded-lg hover:bg-primary-50 text-gray-400 hover:text-primary-600 transition-colors" title="Ver detalhes"><Icons.Eye /></button>
+                                                        <button onClick={() => setConfirmCancelCand(c)} className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors" title="Cancelar"><Icons.Trash /></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {filteredCand.length === 0 && (
+                                <div className="text-center py-16">
+                                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4 text-gray-400"><Icons.Document /></div>
+                                    <p className="text-gray-500 font-medium">Nenhuma candidatura ainda</p>
+                                    <p className="text-gray-400 text-sm mt-1">Candidate-se a uma vaga para começar</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingVaga ? 'Editar Vaga' : 'Nova Vaga'} size="lg">
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Título da Vaga *</label>
+                                <input type="text" value={form.titulo} onChange={e => setForm({...form, titulo: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Ex: Desenvolvedor(a) Full Stack" />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Empresa *</label>
+                                    <input type="text" value={form.empresa} onChange={e => setForm({...form, empresa: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Nome da empresa" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Área</label>
+                                    <input type="text" value={form.area} onChange={e => setForm({...form, area: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Ex: Tecnologia" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Modalidade</label>
+                                    <select value={form.modalidade} onChange={e => setForm({...form, modalidade: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none bg-white">
+                                        <option>Remoto</option><option>Presencial</option><option>Híbrido</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Faixa Salarial</label>
+                                    <input type="text" value={form.salario} onChange={e => setForm({...form, salario: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="R$ 3.000 - R$ 5.000" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                <textarea value={form.descricao} onChange={e => setForm({...form, descricao: e.target.value})} rows={3} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none resize-none" placeholder="Descreva a vaga..."></textarea>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none bg-white">
+                                    <option>Aberta</option><option>Fechada</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <button onClick={() => setModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm">Cancelar</button>
+                                <button onClick={handleSaveVaga} className="flex-1 btn-primary px-4 py-2.5 rounded-xl text-white font-medium text-sm">{editingVaga ? 'Atualizar' : 'Criar'}</button>
+                            </div>
+                        </div>
+                    </Modal>
+
+                    <Modal isOpen={candidaturaModal.open} onClose={() => setCandidaturaModal({ open: false, vaga: null })} title="Candidatar-se à Vaga" size="lg">
+                        {candidaturaModal.vaga && (
+                            <div className="space-y-4">
+                                <div className="bg-gradient-to-br from-primary-50 to-accent-50 rounded-xl p-4 border border-primary-100">
+                                    <p className="font-display font-bold text-gray-900">{candidaturaModal.vaga.titulo}</p>
+                                    <p className="text-sm text-primary-700 font-medium">{candidaturaModal.vaga.empresa} · {candidaturaModal.vaga.modalidade}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
+                                    <input type="text" value={candForm.candidatoNome} onChange={e => setCandForm({...candForm, candidatoNome: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Seu nome completo" />
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                        <input type="email" value={candForm.candidatoEmail} onChange={e => setCandForm({...candForm, candidatoEmail: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="seu@email.com" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
+                                        <input type="text" value={candForm.candidatoTelefone} onChange={e => setCandForm({...candForm, candidatoTelefone: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="(00) 00000-0000" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Experiência Profissional</label>
+                                    <textarea value={candForm.experiencia} onChange={e => setCandForm({...candForm, experiencia: e.target.value})} rows={2} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none resize-none" placeholder="Descreva brevemente sua experiência..."></textarea>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn / Portfólio</label>
+                                    <input type="text" value={candForm.linkedin} onChange={e => setCandForm({...candForm, linkedin: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="linkedin.com/in/seu-perfil" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Carta de Apresentação</label>
+                                    <textarea value={candForm.apresentacao} onChange={e => setCandForm({...candForm, apresentacao: e.target.value})} rows={3} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none resize-none" placeholder="Conte por que você é o candidato ideal..."></textarea>
+                                </div>
+                                <div className="flex gap-3 pt-4">
+                                    <button onClick={() => setCandidaturaModal({ open: false, vaga: null })} className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm">Cancelar</button>
+                                    <button onClick={handleSalvarCandidatura} className="flex-1 btn-success px-4 py-2.5 rounded-xl text-white font-medium text-sm flex items-center justify-center gap-2">
+                                        <Icons.Document /> Enviar Candidatura
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </Modal>
+
+                    <Modal isOpen={!!detalheCandidatura} onClose={() => setDetalheCandidatura(null)} title="Detalhes da Candidatura" size="lg">
+                        {detalheCandidatura && (
+                            <div className="space-y-4">
+                                <div className="bg-gradient-to-br from-primary-50 to-accent-50 rounded-xl p-4 border border-primary-100">
+                                    <p className="font-display font-bold text-gray-900">{detalheCandidatura.vagaTitulo}</p>
+                                    <p className="text-sm text-primary-700 font-medium">{detalheCandidatura.empresa}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <InfoField label="Candidato" value={detalheCandidatura.candidatoNome} />
+                                    <InfoField label="Email" value={detalheCandidatura.candidatoEmail} />
+                                    <InfoField label="Telefone" value={detalheCandidatura.candidatoTelefone} />
+                                    <InfoField label="Data" value={detalheCandidatura.dataCandidatura} />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">Status</p>
+                                    <Badge variant={statusCandColor[detalheCandidatura.status]}>{detalheCandidatura.status}</Badge>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">Experiência</p>
+                                    <p className="text-sm text-gray-700">{detalheCandidatura.experiencia || '—'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">LinkedIn</p>
+                                    <p className="text-sm text-primary-600">{detalheCandidatura.linkedin || '—'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">Carta de Apresentação</p>
+                                    <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3">{detalheCandidatura.apresentacao || '—'}</p>
+                                </div>
+                            </div>
+                        )}
+                    </Modal>
+
+                    <ConfirmDialog isOpen={!!confirmDelete} onClose={() => setConfirmDelete(null)} onConfirm={handleDeleteVaga} title="Excluir Vaga" message={`Deseja excluir "${confirmDelete?.titulo}"?`} />
+                    <ConfirmDialog isOpen={!!confirmCancelCand} onClose={() => setConfirmCancelCand(null)} onConfirm={handleCancelarCandidatura} title="Cancelar Candidatura" message={`Deseja cancelar sua candidatura para "${confirmCancelCand?.vagaTitulo}"?`} />
+                </div>
+            );
+        }
+
+        function InfoField({ label, value }) {
+            return (
+                <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">{label}</p>
+                    <p className="text-sm text-gray-700 font-medium">{value || '—'}</p>
+                </div>
+            );
+        }
+
+        // ==================== CURSOS + INSCRIÇÕES ====================
+        function CursosPage() {
+            const [cursos, setCursos] = useState(apiService.getAll('cursos'));
+            const [inscricoes, setInscricoes] = useState(apiService.getAll('inscricoes'));
+            const [activeTab, setActiveTab] = useState('cursos');
+            const [search, setSearch] = useState('');
+            const [modalOpen, setModalOpen] = useState(false);
+            const [editingCurso, setEditingCurso] = useState(null);
+            const [inscricaoModal, setInscricaoModal] = useState({ open: false, curso: null });
+            const [detalheInscricao, setDetalheInscricao] = useState(null);
+            const [confirmDelete, setConfirmDelete] = useState(null);
+            const [confirmCancelIns, setConfirmCancelIns] = useState(null);
+            const [toast, setToast] = useState(null);
+
+            const [form, setForm] = useState({ titulo: '', instrutor: '', duracao: '', modalidade: 'Online', categoria: '', vagas: '', inscritos: 0, status: 'Ativo' });
+            const [inscForm, setInscForm] = useState({ alunoNome: '', alunoEmail: '', alunoTelefone: '', formacao: '', motivacao: '' });
+
+            const filteredCursos = useMemo(() => cursos.filter(c => c.titulo.toLowerCase().includes(search.toLowerCase()) || c.categoria.toLowerCase().includes(search.toLowerCase())), [cursos, search]);
+            const filteredIns = useMemo(() => inscricoes.filter(i => i.cursoTitulo.toLowerCase().includes(search.toLowerCase()) || i.alunoNome.toLowerCase().includes(search.toLowerCase())), [inscricoes, search]);
+
+            const openCreate = () => { setEditingCurso(null); setForm({ titulo: '', instrutor: '', duracao: '', modalidade: 'Online', categoria: '', vagas: '', inscritos: 0, status: 'Ativo' }); setModalOpen(true); };
+            const openEdit = (curso) => { setEditingCurso(curso); setForm({ titulo: curso.titulo, instrutor: curso.instrutor, duracao: curso.duracao, modalidade: curso.modalidade, categoria: curso.categoria, vagas: curso.vagas, inscritos: curso.inscritos, status: curso.status }); setModalOpen(true); };
+
+            const handleSaveCurso = () => {
+                if (!form.titulo || !form.instrutor) { setToast({ message: 'Preencha os campos obrigatórios', type: 'error' }); return; }
+                const data = { ...form, vagas: parseInt(form.vagas) || 0, inscritos: parseInt(form.inscritos) || 0 };
+                if (editingCurso) {
+                    apiService.update('cursos', editingCurso.id, data);
+                    setToast({ message: 'Curso atualizado!', type: 'success' });
+                } else {
+                    apiService.create('cursos', data);
+                    setToast({ message: 'Curso criado!', type: 'success' });
+                }
+                setCursos(apiService.getAll('cursos'));
+                setModalOpen(false);
+            };
+
+            const handleDeleteCurso = () => {
+                apiService.delete('cursos', confirmDelete.id);
+                setCursos(apiService.getAll('cursos'));
+                setConfirmDelete(null);
+                setToast({ message: 'Curso removido!', type: 'success' });
+            };
+
+            const openInscricao = (curso) => {
+                setInscForm({ alunoNome: '', alunoEmail: '', alunoTelefone: '', formacao: '', motivacao: '' });
+                setInscricaoModal({ open: true, curso });
+            };
+
+            const handleSalvarInscricao = () => {
+                const { alunoNome, alunoEmail, alunoTelefone } = inscForm;
+                if (!alunoNome || !alunoEmail || !alunoTelefone) {
+                    setToast({ message: 'Preencha nome, email e telefone', type: 'error' }); return;
+                }
+                const curso = inscricaoModal.curso;
+                const duplicata = inscricoes.some(i => i.cursoId === curso.id && i.alunoEmail.toLowerCase() === alunoEmail.toLowerCase());
+                if (duplicata) {
+                    setToast({ message: 'Este email já está inscrito neste curso', type: 'error' }); return;
+                }
+                if (curso.inscritos >= curso.vagas) {
+                    setToast({ message: 'Curso lotado!', type: 'error' }); return;
+                }
+                apiService.create('inscricoes', {
+                    ...inscForm,
+                    cursoId: curso.id,
+                    cursoTitulo: curso.titulo,
+                    dataInscricao: new Date().toISOString().split('T')[0],
+                    status: 'Pendente'
+                });
+                apiService.update('cursos', curso.id, { inscritos: curso.inscritos + 1 });
+                setInscricoes(apiService.getAll('inscricoes'));
+                setCursos(apiService.getAll('cursos'));
+                setInscricaoModal({ open: false, curso: null });
+                setToast({ message: 'Inscrição realizada com sucesso!', type: 'success' });
+            };
+
+            const handleCancelarInscricao = () => {
+                const insc = confirmCancelIns;
+                const curso = cursos.find(c => c.id === insc.cursoId);
+                apiService.delete('inscricoes', insc.id);
+                if (curso && curso.inscritos > 0) {
+                    apiService.update('cursos', curso.id, { inscritos: curso.inscritos - 1 });
+                    setCursos(apiService.getAll('cursos'));
+                }
+                setInscricoes(apiService.getAll('inscricoes'));
+                setConfirmCancelIns(null);
+                setToast({ message: 'Inscrição cancelada!', type: 'success' });
+            };
+
+            const getProgress = (inscritos, vagas) => vagas > 0 ? Math.round((inscritos / vagas) * 100) : 0;
+            const statusInsColor = { 'Pendente': 'warning', 'Aprovado': 'success', 'Rejeitado': 'danger', 'Concluído': 'info' };
+
+            const tabs = [
+                { id: 'cursos', label: 'Cursos Disponíveis', icon: <Icons.Book />, count: cursos.length },
+                { id: 'inscricoes', label: 'Minhas Inscrições', icon: <Icons.Graduate />, count: inscricoes.length },
+            ];
+
+            return (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+                    {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                        <div>
+                            <h1 className="font-display text-2xl font-bold text-gray-900">Cursos de Capacitação</h1>
+                            <p className="text-gray-500 text-sm mt-1">Explore cursos e inscreva-se como aluno</p>
+                        </div>
+                        {activeTab === 'cursos' && (
+                            <button onClick={openCreate} className="btn-primary px-5 py-2.5 rounded-xl text-white font-medium flex items-center gap-2 text-sm">
+                                <Icons.Plus /> Novo Curso
+                            </button>
+                        )}
+                    </div>
+
+                    <Tabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
+
+                    <div className="mb-6">
+                        <SearchBar value={search} onChange={setSearch} placeholder={activeTab === 'cursos' ? 'Buscar por título ou categoria...' : 'Buscar por curso ou aluno...'} />
+                    </div>
+
+                    {activeTab === 'cursos' && (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            {filteredCursos.map(curso => {
+                                const progress = getProgress(curso.inscritos, curso.vagas);
+                                const isFull = curso.inscritos >= curso.vagas;
+                                return (
+                                    <div key={curso.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 card-hover overflow-hidden">
+                                        <div className={`h-2 ${isFull ? 'bg-gradient-to-r from-red-400 to-red-500' : 'bg-gradient-to-r from-primary-400 to-accent-500'}`}></div>
+                                        <div className="p-6">
+                                            <div className="flex items-start justify-between mb-3">
+                                                <Badge variant={curso.status === 'Ativo' ? 'success' : 'warning'}>{curso.status}</Badge>
+                                                <div className="flex gap-1">
+                                                    <button onClick={() => openEdit(curso)} className="p-1.5 rounded-lg hover:bg-primary-50 text-gray-400 hover:text-primary-600 transition-colors"><Icons.Edit /></button>
+                                                    <button onClick={() => setConfirmDelete(curso)} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"><Icons.Trash /></button>
+                                                </div>
+                                            </div>
+                                            <h3 className="font-display font-bold text-gray-900 mb-1">{curso.titulo}</h3>
+                                            <p className="text-sm text-primary-600 font-medium mb-3">{curso.instrutor}</p>
+
+                                            <div className="grid grid-cols-2 gap-3 mb-4">
+                                                <div className="bg-gray-50 rounded-lg p-2.5 text-center">
+                                                    <p className="text-xs text-gray-400">Duração</p>
+                                                    <p className="text-sm font-semibold text-gray-700">{curso.duracao}</p>
+                                                </div>
+                                                <div className="bg-gray-50 rounded-lg p-2.5 text-center">
+                                                    <p className="text-xs text-gray-400">Modalidade</p>
+                                                    <p className="text-sm font-semibold text-gray-700">{curso.modalidade}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="mb-4">
+                                                <div className="flex justify-between text-xs mb-1">
+                                                    <span className="text-gray-500">{curso.inscritos}/{curso.vagas} inscritos</span>
+                                                    <span className={`font-medium ${isFull ? 'text-red-600' : 'text-primary-600'}`}>{progress}%</span>
+                                                </div>
+                                                <div className="w-full bg-gray-100 rounded-full h-2">
+                                                    <div className={`h-2 rounded-full transition-all ${isFull ? 'bg-red-500' : 'bg-gradient-to-r from-primary-500 to-accent-500'}`} style={{width: `${Math.min(progress, 100)}%`}}></div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between mb-4">
+                                                <Badge>{curso.categoria}</Badge>
+                                                {isFull && <span className="text-xs text-red-600 font-medium">Lotado</span>}
+                                            </div>
+
+                                            <button onClick={() => openInscricao(curso)} disabled={isFull || curso.status !== 'Ativo'}
+                                                className="w-full btn-success px-4 py-2 rounded-xl text-white font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                                                <Icons.Graduate /> Inscrever-se
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {activeTab === 'inscricoes' && (
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gray-50">
+                                            <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Aluno</th>
+                                            <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Curso</th>
+                                            <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Formação</th>
+                                            <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Data</th>
+                                            <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-50">
+                                        {filteredIns.map(i => (
+                                            <tr key={i.id} className="hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <p className="font-medium text-gray-900 text-sm">{i.alunoNome}</p>
+                                                    <p className="text-xs text-gray-400">{i.alunoEmail}</p>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-700 font-medium">{i.cursoTitulo}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600 hidden md:table-cell">{i.formacao || '—'}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600 hidden lg:table-cell">{i.dataInscricao}</td>
+                                                <td className="px-6 py-4"><Badge variant={statusInsColor[i.status]}>{i.status}</Badge></td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <button onClick={() => setDetalheInscricao(i)} className="p-2 rounded-lg hover:bg-primary-50 text-gray-400 hover:text-primary-600 transition-colors" title="Ver detalhes"><Icons.Eye /></button>
+                                                        <button onClick={() => setConfirmCancelIns(i)} className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors" title="Cancelar"><Icons.Trash /></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {filteredIns.length === 0 && (
+                                <div className="text-center py-16">
+                                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4 text-gray-400"><Icons.Graduate /></div>
+                                    <p className="text-gray-500 font-medium">Nenhuma inscrição ainda</p>
+                                    <p className="text-gray-400 text-sm mt-1">Inscreva-se em um curso para começar</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingCurso ? 'Editar Curso' : 'Novo Curso'} size="lg">
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Título do Curso *</label>
+                                <input type="text" value={form.titulo} onChange={e => setForm({...form, titulo: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Ex: Desenvolvimento Web com React" />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Instrutor(a) *</label>
+                                    <input type="text" value={form.instrutor} onChange={e => setForm({...form, instrutor: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Nome do instrutor" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                                    <input type="text" value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Ex: Tecnologia" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Duração</label>
+                                    <input type="text" value={form.duracao} onChange={e => setForm({...form, duracao: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Ex: 40 horas" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Modalidade</label>
+                                    <select value={form.modalidade} onChange={e => setForm({...form, modalidade: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none bg-white">
+                                        <option>Online</option><option>Presencial</option><option>Híbrido</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Vagas</label>
+                                    <input type="number" value={form.vagas} onChange={e => setForm({...form, vagas: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="30" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none bg-white">
+                                    <option>Ativo</option><option>Lotado</option><option>Encerrado</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <button onClick={() => setModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm">Cancelar</button>
+                                <button onClick={handleSaveCurso} className="flex-1 btn-primary px-4 py-2.5 rounded-xl text-white font-medium text-sm">{editingCurso ? 'Atualizar' : 'Criar'}</button>
+                            </div>
+                        </div>
+                    </Modal>
+
+                    <Modal isOpen={inscricaoModal.open} onClose={() => setInscricaoModal({ open: false, curso: null })} title="Inscrição no Curso" size="lg">
+                        {inscricaoModal.curso && (
+                            <div className="space-y-4">
+                                <div className="bg-gradient-to-br from-primary-50 to-accent-50 rounded-xl p-4 border border-primary-100">
+                                    <p className="font-display font-bold text-gray-900">{inscricaoModal.curso.titulo}</p>
+                                    <p className="text-sm text-primary-700 font-medium">{inscricaoModal.curso.instrutor} · {inscricaoModal.curso.duracao}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo do Aluno *</label>
+                                    <input type="text" value={inscForm.alunoNome} onChange={e => setInscForm({...inscForm, alunoNome: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Nome completo" />
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                        <input type="email" value={inscForm.alunoEmail} onChange={e => setInscForm({...inscForm, alunoEmail: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="aluno@email.com" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
+                                        <input type="text" value={inscForm.alunoTelefone} onChange={e => setInscForm({...inscForm, alunoTelefone: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="(00) 00000-0000" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Formação Acadêmica</label>
+                                    <input type="text" value={inscForm.formacao} onChange={e => setInscForm({...inscForm, formacao: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none" placeholder="Ex: Ensino Médio Completo, Graduação em..." />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Motivação para o Curso</label>
+                                    <textarea value={inscForm.motivacao} onChange={e => setInscForm({...inscForm, motivacao: e.target.value})} rows={3} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm input-focus outline-none resize-none" placeholder="Conte por que deseja fazer este curso..."></textarea>
+                                </div>
+                                <div className="flex gap-3 pt-4">
+                                    <button onClick={() => setInscricaoModal({ open: false, curso: null })} className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm">Cancelar</button>
+                                    <button onClick={handleSalvarInscricao} className="flex-1 btn-success px-4 py-2.5 rounded-xl text-white font-medium text-sm flex items-center justify-center gap-2">
+                                        <Icons.Graduate /> Confirmar Inscrição
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </Modal>
+
+                    <Modal isOpen={!!detalheInscricao} onClose={() => setDetalheInscricao(null)} title="Detalhes da Inscrição" size="lg">
+                        {detalheInscricao && (
+                            <div className="space-y-4">
+                                <div className="bg-gradient-to-br from-primary-50 to-accent-50 rounded-xl p-4 border border-primary-100">
+                                    <p className="font-display font-bold text-gray-900">{detalheInscricao.cursoTitulo}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <InfoField label="Aluno" value={detalheInscricao.alunoNome} />
+                                    <InfoField label="Email" value={detalheInscricao.alunoEmail} />
+                                    <InfoField label="Telefone" value={detalheInscricao.alunoTelefone} />
+                                    <InfoField label="Data" value={detalheInscricao.dataInscricao} />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">Status</p>
+                                    <Badge variant={statusInsColor[detalheInscricao.status]}>{detalheInscricao.status}</Badge>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">Formação</p>
+                                    <p className="text-sm text-gray-700">{detalheInscricao.formacao || '—'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">Motivação</p>
+                                    <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3">{detalheInscricao.motivacao || '—'}</p>
+                                </div>
+                            </div>
+                        )}
+                    </Modal>
+
+                    <ConfirmDialog isOpen={!!confirmDelete} onClose={() => setConfirmDelete(null)} onConfirm={handleDeleteCurso} title="Excluir Curso" message={`Deseja excluir "${confirmDelete?.titulo}"?`} />
+                    <ConfirmDialog isOpen={!!confirmCancelIns} onClose={() => setConfirmCancelIns(null)} onConfirm={handleCancelarInscricao} title="Cancelar Inscrição" message={`Deseja cancelar sua inscrição em "${confirmCancelIns?.cursoTitulo}"?`} />
+                </div>
+            );
+        }
+
+        function Footer() {
+            return (
+                <footer className="bg-gray-900 text-white mt-20">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+                                        <span className="text-white font-bold text-lg">C</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-display font-bold text-lg">Conecta Futuros</h3>
+                                        <p className="text-xs text-gray-400">Programa Transforma Futuros</p>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-gray-400 leading-relaxed">Plataforma de conexão entre adultos e oportunidades de emprego e capacitação profissional, com inscrição e candidatura simplificadas.</p>
+                            </div>
+                            <div>
+                                <h4 className="font-display font-bold mb-4">Nossa Missão</h4>
+                                <p className="text-sm text-gray-400 leading-relaxed">Promover inclusão produtiva, reduzir desigualdades e fomentar o crescimento econômico sustentável, conectando pessoas a oportunidades reais de transformação profissional.</p>
+                            </div>
+                        </div>
+                        <div className="border-t border-white/10 mt-8 pt-8 text-center">
+                            <p className="text-sm text-gray-500">© 2024 Conecta Futuros — Projeto Final do Programa Transforma Futuros. Todos os direitos reservados.</p>
+                        </div>
+                    </div>
+                </footer>
+            );
+        }
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+
+            const renderPage = () => {
+                switch(currentPage) {
+                    case 'home': return <HomePage setCurrentPage={setCurrentPage} />;
+                    case 'usuarios': return <UsuariosPage />;
+                    case 'vagas': return <VagasPage />;
+                    case 'cursos': return <CursosPage />;
+                    default: return <HomePage setCurrentPage={setCurrentPage} />;
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                    <main className="flex-1">{renderPage()}</main>
+                    <Footer />
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+    </script>
+</body>
+</html>
